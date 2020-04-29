@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:spring="http://www.mulesoft.org/schema/mule/spring"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-current.xsd
+    http://www.mulesoft.org/schema/mule/core
+    http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+    http://www.mulesoft.org/schema/mule/spring
+    http://www.mulesoft.org/schema/mule/spring/current/mule-spring.xsd
+   
+    http://www.mulesoft.org/schema/mule/http
+    http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+
+	<spring:config name="springConfig" files="beans.xml" />
+
+	<spring:security-manager>
+		<spring:delegate-security-provider
+			name="memory-provider" delegate-ref="authenticationManager"/>
+	</spring:security-manager>
+
+
+
+	<http:listener-config name="HTTP_Listener_config"
+		doc:name="HTTP Listener config"
+		doc:id="0a305280-efb9-4b00-90e2-2a0d39fa4f02">
+		<http:listener-connection host="0.0.0.0"
+			port="8081" />
+	</http:listener-config>
+	<flow name="spring2Flow"
+		doc:id="1f02aa0e-003a-45a5-acc1-e4cd5a839654">
+		<http:listener doc:name="Listener"
+			doc:id="de3c43ec-543b-41f5-a152-c1221d3c3b74"
+			config-ref="HTTP_Listener_config" path="/springsecurity" />
+		<http:basic-security-filter realm="mule-realm" securityProviders="#[['memory-provider']]">
+		</http:basic-security-filter>
+		<spring:authorization-filter
+			requiredAuthorities="ROLE_ADMIN" />
+		<logger level="INFO" doc:name="Logger"
+			doc:id="ca1ccdd5-9929-41da-8920-d8543a744dc7" />
+	</flow>
+</mule>

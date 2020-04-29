@@ -12,17 +12,20 @@
       http://www.springframework.org/schema/context/spring-context-4.2.xsd
       http://www.springframework.org/schema/security
       http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+      
+<bean name="bcryptEncoder"
+	class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
 
   <ss:authentication-manager alias="authenticationManager">
-    <ss:authentication-provider >
+    <ss:authentication-provider>
       <ss:user-service id="userService">
-        <ss:user name="admin" password="{noop}admin" authorities="ROLE_ADMIN" />
-        <ss:user name="joe" password="{noop}secret" authorities="ROLE_ADMIN" />
-        <ss:user name="anon" password="{noop}anon" authorities="ROLE_ANON" />
-        <ss:user name="user" password="{noop}password" authorities="ROLE_ANON" />
-        <ss:user name="ross" password="{noop}ross" authorities="ROLE_ANON" />
-        <ss:user name="marie" password="{noop}marie" authorities="ROLE_ANON" />
-         <ss:user name="bob" password="{noop}bob" authorities="ROLE_ANON" />
+        <ss:user name="admin" password="{noop}${secure::password.admin}" authorities="ROLE_ADMIN" />
+        <ss:user name="joe" password="{noop}${secure::password.joe}" authorities="ROLE_ADMIN" />
+        <ss:user name="anon" password="{noop}${secure::password.anon}" authorities="ROLE_ANON" />
+        <ss:user name="user" password="{noop}${secure::password.user}" authorities="ROLE_ANON" />
+        <ss:user name="ross" password="{noop}${secure::password.ross}" authorities="ROLE_ANON" />
+        <ss:user name="marie" password="{noop}${secure::password.ross}" authorities="ROLE_ANON" />
+         <ss:user name="bob" password="{noop}${secure::password.bob}" authorities="ROLE_ANON" />
       </ss:user-service>
     </ss:authentication-provider>
   </ss:authentication-manager>

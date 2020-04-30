@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:spring="http://www.mulesoft.org/schema/mule/spring"
-	xsi:schemaLocation="
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:spring="http://www.mulesoft.org/schema/mule/spring" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans-current.xsd
     http://www.mulesoft.org/schema/mule/core
@@ -14,8 +14,10 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
     http://www.mulesoft.org/schema/mule/spring/current/mule-spring.xsd
    
     http://www.mulesoft.org/schema/mule/http
-    http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
-
+    http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
 
 	<spring:config name="springConfig" files="beans.xml" />
 
@@ -32,6 +34,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 		<http:listener-connection host="0.0.0.0"
 			port="8081" />
 	</http:listener-config>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="0520d894-a215-4d18-a6e8-1ddd000ba369" file="default.properties" key="7iQ2YE1a6Mk4PcAB"/>
 	<flow name="spring2Flow"
 		doc:id="1f02aa0e-003a-45a5-acc1-e4cd5a839654">
 		<http:listener doc:name="Listener"
@@ -41,7 +44,22 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 		</http:basic-security-filter>
 		<spring:authorization-filter
 			requiredAuthorities="ROLE_ADMIN" />
-		<logger level="INFO" doc:name="Logger"
-			doc:id="ca1ccdd5-9929-41da-8920-d8543a744dc7" />
+		<ee:transform doc:name="Transform Message" doc:id="fb2a7a71-9d66-447c-886f-e3fe61c8e2ac">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+import fromBase64 from dw::core::Binaries
+
+var extract = (message.attributes.headers.authorization splitBy(" "))[1]
+var decoded = fromBase64(extract)
+var principle = (decoded splitBy(":"))[0] 
+---
+{
+	"authenticated as" : principle as String 
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="ca1ccdd5-9929-41da-8920-d8543a744dc7" message="authentication successfull " />
 	</flow>
 </mule>
